@@ -1,0 +1,36 @@
+name: usop_nfc
+description: "Android app to scan member USOP RFID."
+publish_to: 'none'
+version: 1.2.3
+
+environment:
+  sdk: ^3.5.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.2.2
+  geolocator: ^9.0.0 
+  nfc_manager: ^3.5.0 # or the latest version
+  shared_preferences: ^2.3.2
+  connectivity_plus: ^5.0.2
+
+
+
+
+
+dev_dependencies:
+
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/USOP Logo.png
+    - assets/pickleball.png
+    - assets/transferguy.png
+
+
