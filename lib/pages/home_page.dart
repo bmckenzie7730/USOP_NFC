@@ -245,10 +245,8 @@ void _updateMemberData(Map<String, dynamic> memberData) async {
     bool hasName = (memberData['first_name']?.toString().trim().isNotEmpty == true) || 
                   (memberData['last_name']?.toString().trim().isNotEmpty == true);
     
-    if (!hasName) {
-      imageData = null;  // Force image to null if no name data
-    } else if (imageData == null) {
-      imageData = await _loadDefaultImage();  // Only load default for valid members
+    if (imageData == null && hasName) {
+      imageData = await _loadDefaultImage();
     }
     
     setState(() {
@@ -262,22 +260,23 @@ void _updateMemberData(Map<String, dynamic> memberData) async {
 }
 
 void _handleError(String error, {String? tagId}) {
-  _clearFields();  // This already sets pictureData = null
+  _clearFields();
   setState(() {
     if (tagId != null) {
       nfcDataController.text = tagId;
     }
     isActive = false;
     hasScanned = true;
-    // Explicitly ensure pictureData is null for "Member not found" case
     if (error == 'Member not found') {
       pictureData = null;
+      isLoading = true;  // Prevent new scans while dialog is showing
     }
   });
   
   if (error == 'Member not found') {
     showDialog(
       context: context,
+      barrierDismissible: false,  // Force user to click OK
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Member Not Found'),
@@ -285,6 +284,9 @@ void _handleError(String error, {String? tagId}) {
           actions: [
             TextButton(
               onPressed: () {
+                setState(() {
+                  isLoading = false;  // Re-enable scanning
+                });
                 Navigator.pop(context);
               },
               child: const Text('OK'),

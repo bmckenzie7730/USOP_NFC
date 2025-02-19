@@ -60,8 +60,8 @@ class MemberDataController {
         debugPrint('Handling no record found case');
         // Clear all member data and set border to red
         final clearedData = {
-          'first_name': '',  // Empty string instead of null
-          'last_name': '',   // Empty string instead of null
+          'first_name': "",
+          'last_name': "",
           'picture': null,
           'food_remaining': null,
           'drink_remaining': null,
@@ -115,9 +115,10 @@ class MemberDataController {
       debugPrint('API Response received: ${response.toString()}');
       
       // Handle successful API response
-
+      if (response != null) {
         // Check if both first_name and last_name are null to determine if no record was found
-        if (response['first_name'] == null && response['last_name'] == null) {
+        if ((response['first_name'] == null || response['first_name'].toString().trim().isEmpty) && 
+          (response['last_name'] == null || response['last_name'].toString().trim().isEmpty)) {
           debugPrint('No record found (null names)');
           return {
             'status': 'error',
@@ -127,7 +128,13 @@ class MemberDataController {
           debugPrint('Member data found');
           return response;
         }
-
+      } else {
+        debugPrint('Null response received');
+        return {
+          'status': 'error',
+          'message': 'invalid_response'
+        };
+      }
         
     } on SocketException catch (e) {
       debugPrint('Socket Exception in _fetchMemberData: $e');
