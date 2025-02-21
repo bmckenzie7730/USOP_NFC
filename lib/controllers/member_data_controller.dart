@@ -115,7 +115,7 @@ class MemberDataController {
       debugPrint('API Response received: ${response.toString()}');
       
       // Handle successful API response
-      if (response != null) {
+      
         // Check if both first_name and last_name are null to determine if no record was found
         if ((response['first_name'] == null || response['first_name'].toString().trim().isEmpty) && 
           (response['last_name'] == null || response['last_name'].toString().trim().isEmpty)) {
@@ -128,14 +128,7 @@ class MemberDataController {
           debugPrint('Member data found');
           return response;
         }
-      } else {
-        debugPrint('Null response received');
-        return {
-          'status': 'error',
-          'message': 'invalid_response'
-        };
-      }
-        
+       
     } on SocketException catch (e) {
       debugPrint('Socket Exception in _fetchMemberData: $e');
       await _showServerConnectionDialog(context);
