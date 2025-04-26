@@ -328,127 +328,38 @@ void _handleError(String error, {String? tagId}) {
     );
   }
 
-  void _showDeviceNameSelectionDialog() {
-    debugPrint('🚀 DIALOG: Opening forced device name selection dialog');
-    debugPrint('📋 DIALOG: Available device names: $deviceNames');
-    
-    if (deviceNames.isEmpty) {
-      debugPrint('⚠️ DIALOG: Device names list is empty, triggering load');
-      _loadDeviceNames().then((_) {
-        debugPrint('✅ DIALOG: Finished loading device names: $deviceNames');
-        if (deviceNames.isNotEmpty) {
-          _showDeviceNameSelectionDialog();
-        }
-      });
-      return;
-    }
-
-    showDialog(
-      context: context,
-      barrierDismissible: false, // User must select a device
-      builder: (BuildContext context) {
-        String? selectedDevice;
-        
-        return AlertDialog(
-          title: const Text('Select Device Name'),
-          content: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text('Please select a device name to continue'),
-                  const SizedBox(height: 16),
-                  DropdownButton<String>(
-                    value: selectedDevice,
-                    hint: const Text('Select a device name'),
-                    isExpanded: true,
-                    items: deviceNames.map<DropdownMenuItem<String>>((String name) {
-                      return DropdownMenuItem<String>(
-                        value: name,
-                        child: Text(name),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        selectedDevice = newValue;
-                      });
-                    },
-                  ),
-                ],
-              );
-            },
-          ),
-          actions: [
-            TextButton(
-              onPressed: () async {
-                if (selectedDevice != null) {
-                  final response = await settingsController.apiService.getDeviceNames(
-                    apiIpAddress,
-                    useHttps: useHttps,
-                  );
-                  
-                  setState(() {
-                    deviceName = selectedDevice!;
-                    GlobalState.scanType = response['scan_types'][selectedDevice] ?? '';
-                  });
-                  
-                  debugPrint('Selected device: $selectedDevice');
-                  debugPrint('Set scan type: ${GlobalState.scanType}');
-                  
-                  await settingsController.updateDeviceName(selectedDevice!);
-                  Navigator.pop(context);
-                } else {
-                  _showSnackBar('Please select a device name', Colors.red);
-                }
-              },
-              child: const Text('Confirm'),
-            ),
-          ],
-        );
-      },
-    );
+void _showDeviceNameSelectionDialog() {
+  debugPrint('🚀 DIALOG: Opening forced device name selection dialog');
+  debugPrint('📋 DIALOG: Available device names: $deviceNames');
+  
+  if (deviceNames.isEmpty) {
+    debugPrint('⚠️ DIALOG: Device names list is empty, triggering load');
+    _loadDeviceNames().then((_) {
+      debugPrint('✅ DIALOG: Finished loading device names: $deviceNames');
+      if (deviceNames.isNotEmpty) {
+        _showDeviceNameSelectionDialog();
+      }
+    });
+    return;
   }
 
-  void _showDeviceNameDialog() {
-    if (deviceName.isEmpty) {
-      _showDeviceNameSelectionDialog();
-      return;
-    }
-    
-    debugPrint('🚀 DIALOG: Opening device name dialog');
-    debugPrint('📱 DIALOG: Current device name: $deviceName');
-    debugPrint('📋 DIALOG: Available device names: $deviceNames');
-    debugPrint('🌐 DIALOG: API Address: $apiIpAddress');
-    debugPrint('🔒 DIALOG: HTTPS enabled: $useHttps');
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        debugPrint('🏗️ DIALOG: Building dialog widget');
-        return AlertDialog(
-          title: const Text('Select Device Name'),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: deviceNames.isEmpty 
-              ? Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text('No device names available'),
-                    ElevatedButton(
-                      onPressed: () {
-                        debugPrint('🔄 DIALOG: Retry button pressed');
-                        Navigator.pop(context);
-                        _loadDeviceNames().then((_) {
-                          debugPrint('✅ DIALOG: Retry load finished, device names: $deviceNames');
-                          _showDeviceNameDialog();
-                        });
-                      },
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                )
-              : DropdownButton<String>(
-                  value: deviceName,
+  showDialog(
+    context: context,
+    barrierDismissible: false, // User must select a device
+    builder: (BuildContext context) {
+      String? selectedDevice;
+      
+      return AlertDialog(
+        title: const Text('Select Device Name'),
+        content: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Please select a device name to continue'),
+                const SizedBox(height: 16),
+                DropdownButton<String>(
+                  value: selectedDevice,
                   hint: const Text('Select a device name'),
                   isExpanded: true,
                   items: deviceNames.map<DropdownMenuItem<String>>((String name) {
@@ -457,31 +368,125 @@ void _handleError(String error, {String? tagId}) {
                       child: Text(name),
                     );
                   }).toList(),
-                  onChanged: (String? newValue) async {
-                    if (newValue != null) {
-                      final response = await settingsController.apiService.getDeviceNames(
-                        apiIpAddress,
-                        useHttps: useHttps,
-                      );
-                      
-                      setState(() {
-                        deviceName = newValue;
-                        GlobalState.scanType = response['scan_types'][newValue] ?? '';
-                      });
-                      
-                      debugPrint('Selected device: $newValue');
-                      debugPrint('Set scan type: ${GlobalState.scanType}');
-                      
-                      await settingsController.updateDeviceName(newValue);
-                      Navigator.pop(context);
-                    }
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedDevice = newValue;
+                    });
                   },
                 ),
+              ],
+            );
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              if (selectedDevice != null) {
+                final response = await settingsController.apiService.getDeviceNames(
+                  apiIpAddress,
+                  useHttps: useHttps,
+                );
+                
+                setState(() {
+                  deviceName = selectedDevice!;
+                  GlobalState.scanType = response['scan_types'][selectedDevice] ?? '';
+                });
+                
+                debugPrint('Selected device: $selectedDevice');
+                debugPrint('Set scan type: ${GlobalState.scanType}');
+                
+                await settingsController.updateDeviceName(selectedDevice!);
+                // Save scan type to storage
+                await settingsController.updateScanType(GlobalState.scanType);
+                
+                Navigator.pop(context);
+              } else {
+                _showSnackBar('Please select a device name', Colors.red);
+              }
+            },
+            child: const Text('Confirm'),
           ),
-        );
-      },
-    );
+        ],
+      );
+    },
+  );
+}
+void _showDeviceNameDialog() {
+  if (deviceName.isEmpty) {
+    _showDeviceNameSelectionDialog();
+    return;
   }
+  
+  debugPrint('🚀 DIALOG: Opening device name dialog');
+  debugPrint('📱 DIALOG: Current device name: $deviceName');
+  debugPrint('📋 DIALOG: Available device names: $deviceNames');
+  debugPrint('🌐 DIALOG: API Address: $apiIpAddress');
+  debugPrint('🔒 DIALOG: HTTPS enabled: $useHttps');
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      debugPrint('🏗️ DIALOG: Building dialog widget');
+      return AlertDialog(
+        title: const Text('Select Device Name'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: deviceNames.isEmpty 
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('No device names available'),
+                  ElevatedButton(
+                    onPressed: () {
+                      debugPrint('🔄 DIALOG: Retry button pressed');
+                      Navigator.pop(context);
+                      _loadDeviceNames().then((_) {
+                        debugPrint('✅ DIALOG: Retry load finished, device names: $deviceNames');
+                        _showDeviceNameDialog();
+                      });
+                    },
+                    child: const Text('Retry'),
+                  ),
+                ],
+              )
+            : DropdownButton<String>(
+                value: deviceName,
+                hint: const Text('Select a device name'),
+                isExpanded: true,
+                items: deviceNames.map<DropdownMenuItem<String>>((String name) {
+                  return DropdownMenuItem<String>(
+                    value: name,
+                    child: Text(name),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) async {
+                  if (newValue != null) {
+                    final response = await settingsController.apiService.getDeviceNames(
+                      apiIpAddress,
+                      useHttps: useHttps,
+                    );
+                    
+                    setState(() {
+                      deviceName = newValue;
+                      GlobalState.scanType = response['scan_types'][newValue] ?? '';
+                    });
+                    
+                    debugPrint('Selected device: $newValue');
+                    debugPrint('Set scan type: ${GlobalState.scanType}');
+                    
+                    await settingsController.updateDeviceName(newValue);
+                    // Save scan type to storage
+                    await settingsController.updateScanType(GlobalState.scanType);
+                    
+                    Navigator.pop(context);
+                  }
+                },
+              ),
+        ),
+      );
+    },
+  );
+}
 
   Future<void> _exitApp() async {
     locationManager.dispose();

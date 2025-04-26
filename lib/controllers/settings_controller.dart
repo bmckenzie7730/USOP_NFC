@@ -1,11 +1,10 @@
-// lib/controllers/settings_controller.dart
-
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
 import '../utils/ui_helpers.dart';
 import '../pages/settings_page.dart';
+import '../pages/home_page.dart';  // For GlobalState
 
 class SettingsController {
   final ApiService apiService;
@@ -24,6 +23,13 @@ class SettingsController {
     String apiIpAddress = _prefs.getString('apiIpAddress') ?? 'not defined';
     String deviceName = _prefs.getString('deviceName') ?? 'Not Defined';
     bool useHttps = _prefs.getBool('useHttps') ?? false;
+    
+    // Load scan type and set to GlobalState
+    String scanType = _prefs.getString('scanType') ?? '';
+    GlobalState.scanType = scanType;
+    
+    debugPrint('🔍 DEBUG: loadSettings - Loaded scanType from storage: "$scanType"');
+    debugPrint('🔍 DEBUG: loadSettings - GlobalState.scanType set to: "${GlobalState.scanType}"');
     
     onSettingsChanged(apiIpAddress, deviceName, useHttps);
   }
@@ -44,6 +50,24 @@ class SettingsController {
     String apiIpAddress = _prefs.getString('apiIpAddress') ?? 'not defined';
     bool useHttps = _prefs.getBool('useHttps') ?? false;
     onSettingsChanged(apiIpAddress, newDeviceName, useHttps);
+  }
+
+  Future<void> updateScanType(String newScanType) async {
+    // Ensure _prefs is initialized
+    _prefs = await SharedPreferences.getInstance();
+    
+    debugPrint('🔍 DEBUG: updateScanType - Saving scanType to storage: "$newScanType"');
+    await _prefs.setString('scanType', newScanType);
+    GlobalState.scanType = newScanType;
+    debugPrint('🔍 DEBUG: updateScanType - GlobalState.scanType set to: "${GlobalState.scanType}"');
+    debugPrint('🔍 DEBUG: updateScanType - Verifying save: Storage now has: "${_prefs.getString('scanType')}"');
+  }
+
+  Future<String?> getScanType() async {
+    _prefs = await SharedPreferences.getInstance();
+    String? scanType = _prefs.getString('scanType');
+    debugPrint('🔍 DEBUG: getScanType - Retrieved from storage: "$scanType"');
+    return scanType;
   }
 
   Future<void> showPasswordDialog({bool bypassPassword = false}) async {
